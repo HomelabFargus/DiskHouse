@@ -1,0 +1,189 @@
+name: Build And Push To GHCR
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Legacy single-service selector used only when no checkboxes are selected
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - id
+          - personal
+          - disk
+          - iscsi
+          - storage-node
+          - frontend
+      build_id:
+        description: Build `id`
+        required: false
+        default: false
+        type: boolean
+      build_personal:
+        description: Build `personal`
+        required: false
+        default: false
+        type: boolean
+      build_disk:
+        description: Build `disk`
+        required: false
+        default: false
+        type: boolean
+      build_iscsi:
+        description: Build `iscsi`
+        required: false
+        default: false
+        type: boolean
+      build_storage_node:
+        description: Build `storage-node`
+        required: false
+        default: false
+        type: boolean
+      build_frontend:
+        description: Build `frontend`
+        required: false
+        default: false
+        type: boolean
+      push_latest:
+        description: Also push the latest tag
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  prepare:
+    runs-on: self-hosted
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Build matrix
+        id: matrix
+        env:
+          SELECTED_SERVICE: ${{ inputs.service }}
+          BUILD_ID: ${{ inputs.build_id }}
+          BUILD_PERSONAL: ${{ inputs.build_personal }}
+          BUILD_DISK: ${{ inputs.build_disk }}
+          BUILD_ISCSI: ${{ inputs.build_iscsi }}
+          BUILD_STORAGE_NODE: ${{ inputs.build_storage_node }}
+          BUILD_FRONTEND: ${{ inputs.build_frontend }}
+        run: |
+          include=""
+          checkbox_selected="false"
+
+          append_service() {
+            service="$1"
+            image="$2"
+            dockerfile="$3"
+
+            if [ -n "$include" ]; then
+              include="$include,"
+            fi
+
+            include="${include}{\"service\":\"$service\",\"image\":\"$image\",\"dockerfile\":\"$dockerfile\"}"
+          }
+
+          if [ "$BUILD_ID" = "true" ]; then
+            append_service "id" "id-service" "id/Dockerfile"
+            checkbox_selected="true"
+          fi
+
+          if [ "$BUILD_PERSONAL" = "true" ]; then
+            append_service "personal" "personal-service" "personal/Dockerfile"
+            checkbox_selected="true"
+          fi
+
+          if [ "$BUILD_DISK" = "true" ]; then
+            append_service "disk" "disk-service" "disk/Dockerfile"
+            checkbox_selected="true"
+          fi
+
+          if [ "$BUILD_ISCSI" = "true" ]; then
+            append_service "iscsi" "iscsi-service" "ISCSI/Dockerfile"
+            checkbox_selected="true"
+          fi
+
+          if [ "$BUILD_STORAGE_NODE" = "true" ]; then
+            append_service "storage-node" "storage-node-service" "storage-node/Dockerfile"
+            checkbox_selected="true"
+          fi
+
+          if [ "$BUILD_FRONTEND" = "true" ]; then
+            append_service "frontend" "frontend" "frontend/Dockerfile"
+            checkbox_selected="true"
+          fi
+
+          if [ "$checkbox_selected" != "true" ]; then
+            if [ "$SELECTED_SERVICE" = "all" ]; then
+              append_service "id" "id-service" "id/Dockerfile"
+              append_service "personal" "personal-service" "personal/Dockerfile"
+              append_service "disk" "disk-service" "disk/Dockerfile"
+              append_service "iscsi" "iscsi-service" "ISCSI/Dockerfile"
+              append_service "storage-node" "storage-node-service" "storage-node/Dockerfile"
+              append_service "frontend" "frontend" "frontend/Dockerfile"
+            elif [ "$SELECTED_SERVICE" = "id" ]; then
+              append_service "id" "id-service" "id/Dockerfile"
+            elif [ "$SELECTED_SERVICE" = "personal" ]; then
+              append_service "personal" "personal-service" "personal/Dockerfile"
+            elif [ "$SELECTED_SERVICE" = "disk" ]; then
+              append_service "disk" "disk-service" "disk/Dockerfile"
+            elif [ "$SELECTED_SERVICE" = "iscsi" ]; then
+              append_service "iscsi" "iscsi-service" "ISCSI/Dockerfile"
+            elif [ "$SELECTED_SERVICE" = "storage-node" ]; then
+              append_service "storage-node" "storage-node-service" "storage-node/Dockerfile"
+            elif [ "$SELECTED_SERVICE" = "frontend" ]; then
+              append_service "frontend" "frontend" "frontend/Dockerfile"
+            fi
+          fi
+
+          if [ -z "$include" ]; then
+            echo "No services selected. Choose one or more build_* checkboxes, or use the legacy service input."
+            exit 1
+          fi
+
+          matrix="{\"include\":[${include}]}"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  build-and-push:
+    needs: prepare
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/fargus3222/diskhub/${{ matrix.image }}
+          tags: |
+            type=sha,format=short,prefix=
+            type=raw,value=latest,enable=${{ inputs.push_latest }}
+            type=raw,value=${{ github.ref_name }},enable=${{ github.ref_type == 'branch' }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

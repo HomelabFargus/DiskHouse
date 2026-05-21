@@ -1,0 +1,3 @@
+[workspace]
+members = ["id", "personal", "disk", "ISCSI", "storage-node"]
+resolver = "2"
