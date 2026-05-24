@@ -2,6 +2,8 @@
 
 import type { FormEvent } from "react";
 
+import { uiText } from "../constants";
+
 type LoginScreenProps = {
   isSubmittingAuth: boolean;
   username: string;
@@ -15,9 +17,9 @@ export function LoadingScreen() {
   return (
     <main className="loginScreen">
       <section className="loginCard loginCardCompact">
-        <p className="summaryLabel">diskHub</p>
-        <h1 className="loginTitle">Проверяем сессию</h1>
-        <p className="loginText">Подождите немного, загружаем данные пользователя.</p>
+        <p className="summaryLabel">{uiText.common.brandName}</p>
+        <h1 className="loginTitle">{uiText.auth.loadingTitle}</h1>
+        <p className="loginText">{uiText.auth.loadingText}</p>
       </section>
     </main>
   );
@@ -38,15 +40,15 @@ export function LoginScreen({
           <div className="brand loginBrand">
             <div className="brandMark">D</div>
             <div>
-              <p className="brandTitle">diskHub</p>
-              <p className="brandText">Storage control panel</p>
+              <p className="brandTitle">{uiText.common.brandName}</p>
+              <p className="brandText">{uiText.common.brandTagline}</p>
             </div>
           </div>
 
           <div className="loginHeroContent">
-            <p className="summaryLabel">Вход в систему</p>
-            <h1 className="loginTitle">Войдите в diskHub</h1>
-            <p className="loginText">Авторизуйтесь через Keycloak и откройте рабочую панель.</p>
+            <p className="summaryLabel">{uiText.auth.heroEyebrow}</p>
+            <h1 className="loginTitle">{uiText.auth.heroTitle}</h1>
+            <p className="loginText">{uiText.auth.heroText}</p>
           </div>
         </section>
 
@@ -55,15 +57,15 @@ export function LoginScreen({
             <div className="authHeader">
               <div>
                 <p className="summaryLabel">Keycloak</p>
-                <h2 className="panelTitle">Вход в diskHub</h2>
+                <h2 className="panelTitle">{uiText.auth.cardTitle}</h2>
               </div>
               <p className="panelSubtitle">
-                Realm: <strong>diskhub</strong>.
+                {uiText.auth.realmLabel}: <strong>{uiText.auth.realmName}</strong>.
               </p>
             </div>
 
             <label className="field">
-              <span className="fieldLabel">Логин</span>
+              <span className="fieldLabel">{uiText.auth.username}</span>
               <input
                 className="fieldInput"
                 value={username}
@@ -74,7 +76,7 @@ export function LoginScreen({
             </label>
 
             <label className="field">
-              <span className="fieldLabel">Пароль</span>
+              <span className="fieldLabel">{uiText.auth.password}</span>
               <input
                 className="fieldInput"
                 type="password"
@@ -87,7 +89,7 @@ export function LoginScreen({
 
             <div className="authActions">
               <button className="action" type="submit" disabled={isSubmittingAuth}>
-                {isSubmittingAuth ? "Вход..." : "Войти"}
+                {isSubmittingAuth ? uiText.auth.submitting : uiText.auth.submit}
               </button>
             </div>
           </form>

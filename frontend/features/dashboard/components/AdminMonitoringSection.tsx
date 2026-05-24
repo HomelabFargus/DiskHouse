@@ -1,5 +1,6 @@
 "use client";
 
+import { uiText } from "../constants";
 import type { MonitoringHistoryPoint, MonitoringSnapshot } from "../types";
 import {
   formatCompactBytesPerSecond,
@@ -21,46 +22,46 @@ export function AdminMonitoringSection({
 }: AdminMonitoringSectionProps) {
   const system = monitoringSnapshot?.system ?? null;
   const physicalDisks = (monitoringSnapshot?.physical_disks ?? []).slice(0, 8);
-  const updatedAt = monitoringSnapshot ? formatTimestamp(monitoringSnapshot.generated_at_ms) : "ожидание";
+  const updatedAt = monitoringSnapshot
+    ? formatTimestamp(monitoringSnapshot.generated_at_ms)
+    : uiText.common.waiting;
 
   return (
     <section className="contentGrid contentGridSingle">
       <section className="panel panelMain panelFlat">
         <div className="panelHeader">
           <div>
-            <p className="summaryLabel">Администрирование</p>
-            <h2 className="panelTitle">Мониторинг</h2>
-            <p className="panelSubtitle">
-              Физические диски и host-level I/O метрики вынесены в отдельный admin dashboard.
-            </p>
+            <p className="summaryLabel">{uiText.adminMonitoring.eyebrow}</p>
+            <h2 className="panelTitle">{uiText.adminMonitoring.title}</h2>
+            <p className="panelSubtitle">{uiText.adminMonitoring.subtitle}</p>
           </div>
           <div className={`statusPill ${isLoading ? "" : "statusDone"}`}>
-            {isLoading ? "Syncing" : updatedAt}
+            {isLoading ? uiText.common.syncing : updatedAt}
           </div>
         </div>
 
         <section className="summaryGrid summaryGridOverview">
           <article className="summaryCard">
-            <p className="summaryLabel">Host throughput</p>
+            <p className="summaryLabel">{uiText.adminMonitoring.cards.throughput.label}</p>
             <p className="summaryValue">
               {formatCompactBytesPerSecond(system?.throughput_bytes_per_sec ?? 0)}
             </p>
-            <p className="summaryMeta">Общий поток по физическим устройствам хоста.</p>
+            <p className="summaryMeta">{uiText.adminMonitoring.cards.throughput.meta}</p>
           </article>
           <article className="summaryCard">
-            <p className="summaryLabel">Host IOPS</p>
+            <p className="summaryLabel">{uiText.adminMonitoring.cards.iops.label}</p>
             <p className="summaryValue">{formatCompactNumber(system?.total_iops ?? 0)}</p>
-            <p className="summaryMeta">Суммарные операции ввода-вывода по системе.</p>
+            <p className="summaryMeta">{uiText.adminMonitoring.cards.iops.meta}</p>
           </article>
           <article className="summaryCard">
-            <p className="summaryLabel">Peak busy</p>
+            <p className="summaryLabel">{uiText.adminMonitoring.cards.busy.label}</p>
             <p className="summaryValue">{formatPercent(system?.peak_busy_percent ?? 0)}</p>
-            <p className="summaryMeta">Пиковая загрузка среди физических дисков.</p>
+            <p className="summaryMeta">{uiText.adminMonitoring.cards.busy.meta}</p>
           </article>
           <article className="summaryCard">
-            <p className="summaryLabel">Devices</p>
+            <p className="summaryLabel">{uiText.adminMonitoring.cards.devices.label}</p>
             <p className="summaryValue">{formatCompactNumber(system?.active_device_count ?? 0)}</p>
-            <p className="summaryMeta">Количество активных блочных устройств в snapshot.</p>
+            <p className="summaryMeta">{uiText.adminMonitoring.cards.devices.meta}</p>
           </article>
         </section>
 
@@ -68,21 +69,21 @@ export function AdminMonitoringSection({
           <AdminTimeSeriesCard
             accentClassName="chartToneAmber"
             history={monitoringHistory}
-            label="Physical throughput"
+            label={uiText.adminMonitoring.charts.throughput}
             value={formatCompactBytesPerSecond(system?.throughput_bytes_per_sec ?? 0)}
             valueKey="throughput_bytes_per_sec"
           />
           <AdminTimeSeriesCard
             accentClassName="chartToneCyan"
             history={monitoringHistory}
-            label="Physical IOPS"
+            label={uiText.adminMonitoring.charts.iops}
             value={formatCompactNumber(system?.total_iops ?? 0)}
             valueKey="total_iops"
           />
           <AdminTimeSeriesCard
             accentClassName="chartToneRed"
             history={monitoringHistory}
-            label="Physical busy"
+            label={uiText.adminMonitoring.charts.busy}
             value={formatPercent(system?.peak_busy_percent ?? 0)}
             valueKey="busy_percent"
           />
@@ -90,18 +91,20 @@ export function AdminMonitoringSection({
 
         <section className="inventoryTableShell monitoringTableShell">
           <div className="tableHead monitoringHead">
-            <span>Устройство</span>
-            <span>Throughput</span>
-            <span>IOPS</span>
-            <span>Busy</span>
-            <span>Inflight</span>
+            <span>{uiText.adminMonitoring.table.device}</span>
+            <span>{uiText.adminMonitoring.table.throughput}</span>
+            <span>{uiText.adminMonitoring.table.iops}</span>
+            <span>{uiText.adminMonitoring.table.busy}</span>
+            <span>{uiText.adminMonitoring.table.inflight}</span>
           </div>
 
           <div className="tableBody">
             {physicalDisks.length === 0 ? (
               <div className="tableRow tableRowEmpty tableRowEmptyState">
                 <span className="placeholder">
-                  {isLoading ? "Загружаем physical metrics..." : "Physical диски пока не пришли."}
+                  {isLoading
+                    ? uiText.adminMonitoring.emptyLoading
+                    : uiText.adminMonitoring.empty}
                 </span>
               </div>
             ) : (
@@ -109,7 +112,7 @@ export function AdminMonitoringSection({
                 <article className="tableRow monitoringRow" key={disk.device_name}>
                   <span className="tableService tableServiceDisk">
                     {disk.device_name}
-                    <span className="rowMeta">physical block device</span>
+                    <span className="rowMeta">{uiText.adminMonitoring.table.deviceMeta}</span>
                   </span>
                   <span className="tableMessage">{formatCompactBytesPerSecond(disk.throughput_bytes_per_sec)}</span>
                   <span className="tableMessage">{formatCompactNumber(disk.total_iops)}</span>
@@ -158,7 +161,7 @@ function AdminTimeSeriesCard({
           <path d={chartPoints.linePath} className="sparklineStroke" />
         </svg>
       </div>
-      <p className="summaryMeta">История физических метрик за последние snapshot-точки.</p>
+      <p className="summaryMeta">{uiText.adminMonitoring.charts.historyMeta}</p>
     </article>
   );
 }

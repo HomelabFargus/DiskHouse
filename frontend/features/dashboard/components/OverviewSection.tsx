@@ -1,5 +1,6 @@
 "use client";
 
+import { uiText } from "../constants";
 import type {
   MonitoringHistoryPoint,
   MonitoringSnapshot
@@ -41,7 +42,9 @@ export function OverviewSection({
     monitoringSnapshot?.users.find((user) => user.owner_display === displayName) ??
     monitoringSnapshot?.users[0] ??
     null;
-  const systemUpdatedAt = monitoringSnapshot ? formatTimestamp(monitoringSnapshot.generated_at_ms) : "ожидание";
+  const systemUpdatedAt = monitoringSnapshot
+    ? formatTimestamp(monitoringSnapshot.generated_at_ms)
+    : uiText.common.waiting;
   const sideRankingItems = topLogicalDisks.map((item) => ({
     id: item.disk_id,
     label: item.name,
@@ -69,37 +72,35 @@ export function OverviewSection({
       <section className="panel panelMain overviewPanel overviewPanelSystem">
         <div className="panelHeader">
           <div>
-            <p className="summaryLabel">Grafana-style Board</p>
-            <h2 className="panelTitle">I/O выпущенных iSCSI-дисков</h2>
-            <p className="panelSubtitle">
-              Overview показывает только тома, реально выпущенные пользователям через iSCSI.
-            </p>
+            <p className="summaryLabel">{uiText.overview.boardEyebrow}</p>
+            <h2 className="panelTitle">{uiText.overview.boardTitle}</h2>
+            <p className="panelSubtitle">{uiText.overview.boardSubtitle}</p>
           </div>
           <div className={`statusPill ${isLoading ? "" : "statusDone"}`}>
-            {isLoading ? "Syncing" : systemUpdatedAt}
+            {isLoading ? uiText.common.syncing : systemUpdatedAt}
           </div>
         </div>
 
         <section className="summaryGrid summaryGridOverview">
           <MetricSummaryCard
-            label="Активные диски"
+            label={uiText.overview.metrics.activeDisks.label}
             value={String(activeDisks)}
-            meta="Томов в рабочем состоянии по текущему inventory."
+            meta={uiText.overview.metrics.activeDisks.meta}
           />
           <MetricSummaryCard
-            label="Issued throughput"
+            label={uiText.overview.metrics.issuedThroughput.label}
             value={formatCompactBytesPerSecond(system?.throughput_bytes_per_sec ?? 0)}
-            meta="Суммарный поток чтения и записи по выпущенным iSCSI-томам."
+            meta={uiText.overview.metrics.issuedThroughput.meta}
           />
           <MetricSummaryCard
-            label="Issued busy"
+            label={uiText.overview.metrics.issuedBusy.label}
             value={formatPercent(system?.peak_busy_percent ?? 0)}
-            meta="Оценочная peak-нагрузка по выпущенным iSCSI-томам."
+            meta={uiText.overview.metrics.issuedBusy.meta}
           />
           <MetricSummaryCard
-            label="IOPS"
+            label={uiText.overview.metrics.iops.label}
             value={formatCompactNumber(system?.total_iops ?? 0)}
-            meta="Суммарные операции ввода-вывода за секунду."
+            meta={uiText.overview.metrics.iops.meta}
           />
         </section>
 
@@ -107,21 +108,21 @@ export function OverviewSection({
           <TimeSeriesCard
             accentClassName="chartToneAmber"
             history={monitoringHistory}
-            label="Throughput"
+            label={uiText.overview.charts.throughput}
             value={formatCompactBytesPerSecond(system?.throughput_bytes_per_sec ?? 0)}
             valueKey="throughput_bytes_per_sec"
           />
           <TimeSeriesCard
             accentClassName="chartToneCyan"
             history={monitoringHistory}
-            label="IOPS"
+            label={uiText.overview.charts.iops}
             value={formatCompactNumber(system?.total_iops ?? 0)}
             valueKey="total_iops"
           />
           <TimeSeriesCard
             accentClassName="chartToneRed"
             history={monitoringHistory}
-            label="Busy"
+            label={uiText.overview.charts.busy}
             value={formatPercent(system?.peak_busy_percent ?? 0)}
             valueKey="busy_percent"
           />
@@ -132,52 +133,50 @@ export function OverviewSection({
         <section className="panel panelMain overviewPanel">
           <div className="panelHeader">
             <div>
-              <p className="summaryLabel">Runtime Context</p>
-              <h2 className="panelTitle">Текущий профиль</h2>
-              <p className="panelSubtitle">
-                Быстрый срез по текущей учётной записи и её доле в storage-нагрузке.
-              </p>
+              <p className="summaryLabel">{uiText.overview.profile.eyebrow}</p>
+              <h2 className="panelTitle">{uiText.overview.profile.title}</h2>
+              <p className="panelSubtitle">{uiText.overview.profile.subtitle}</p>
             </div>
-            <div className="statusPill">{isAdmin ? "Admin access" : "User access"}</div>
+            <div className="statusPill">
+              {isAdmin ? uiText.overview.profile.adminAccess : uiText.overview.profile.userAccess}
+            </div>
           </div>
 
           <section className="identityShell">
             <div className="identityCard">
-              <p className="summaryLabel">Пользователь</p>
+              <p className="summaryLabel">{uiText.overview.profile.userLabel}</p>
               <p className="identityName">{displayName}</p>
               <p className="identityMeta">{userMeta}</p>
             </div>
             <div className="identityCard">
-              <p className="summaryLabel">Нагрузка</p>
+              <p className="summaryLabel">{uiText.overview.profile.loadLabel}</p>
               <p className="identityName">
                 {formatCompactBytesPerSecond(currentUserAggregate?.throughput_bytes_per_sec ?? 0)}
               </p>
-              <p className="identityMeta">
-                Оценочная доля I/O для дисков пользователя по данным monitoring snapshot.
-              </p>
+              <p className="identityMeta">{uiText.overview.profile.loadMeta}</p>
             </div>
           </section>
 
           <section className="quickInfoGrid">
             <MetricSummaryCard
-              label="Томов"
+              label={uiText.overview.profile.quickStats.volumes.label}
               value={String(activeDisks)}
-              meta="Активных дисков в зоне ответственности."
+              meta={uiText.overview.profile.quickStats.volumes.meta}
             />
             <MetricSummaryCard
-              label="Объём"
+              label={uiText.overview.profile.quickStats.capacity.label}
               value={`${formatCompactNumber(totalDiskSize)} GB`}
-              meta="Суммарный выделенный объём под управлением."
+              meta={uiText.overview.profile.quickStats.capacity.meta}
             />
             <MetricSummaryCard
-              label="User IOPS"
+              label={uiText.overview.profile.quickStats.userIops.label}
               value={formatCompactNumber(currentUserAggregate?.total_iops ?? 0)}
-              meta="Оценочная пользовательская I/O-нагрузка."
+              meta={uiText.overview.profile.quickStats.userIops.meta}
             />
             <MetricSummaryCard
-              label="User busy"
+              label={uiText.overview.profile.quickStats.userBusy.label}
               value={formatPercent(currentUserAggregate?.busy_percent ?? 0)}
-              meta="Оценочная доля загрузки storage-пула."
+              meta={uiText.overview.profile.quickStats.userBusy.meta}
             />
           </section>
         </section>
@@ -185,11 +184,9 @@ export function OverviewSection({
         <aside className="panel panelSide overviewPanel">
           <div className="panelHeader">
             <div>
-              <p className="summaryLabel">Logical layer</p>
-              <h2 className="panelTitle">Top volumes</h2>
-              <p className="panelSubtitle">
-                Диски пользователей с наибольшей оценочной I/O-нагрузкой среди выпущенных iSCSI-томов.
-              </p>
+              <p className="summaryLabel">{uiText.overview.topVolumes.eyebrow}</p>
+              <h2 className="panelTitle">{uiText.overview.topVolumes.title}</h2>
+              <p className="panelSubtitle">{uiText.overview.topVolumes.subtitle}</p>
             </div>
           </div>
 
@@ -208,8 +205,8 @@ export function OverviewSection({
           <div className="stageGrid">
             <button type="button" className="stageCard stageButton" onClick={onOpenDisks}>
               <p className="stageIndex">01</p>
-              <p className="stageName">Диски</p>
-              <p className="stageText">Открыть inventory и перейти к рабочим томам.</p>
+              <p className="stageName">{uiText.overview.topVolumes.openDisksTitle}</p>
+              <p className="stageText">{uiText.overview.topVolumes.openDisksText}</p>
             </button>
           </div>
         </aside>
@@ -218,20 +215,24 @@ export function OverviewSection({
       <section className="panel panelMain overviewPanel overviewPanelNews">
         <div className="panelHeader">
           <div>
-            <p className="summaryLabel">Monitoring Breakdown</p>
-            <h2 className="panelTitle">{isAdmin ? "Пользователи и устройства" : "Мои диски"}</h2>
+            <p className="summaryLabel">{uiText.overview.breakdown.eyebrow}</p>
+            <h2 className="panelTitle">
+              {isAdmin ? uiText.overview.breakdown.adminTitle : uiText.overview.breakdown.userTitle}
+            </h2>
             <p className="summaryMeta">
               {isAdmin
-                ? "Сводка по самым загруженным пользователям и физическим дискам."
-                : "Список дисков пользователя с оценочной долей I/O-нагрузки."}
+                ? uiText.overview.breakdown.adminSubtitle
+                : uiText.overview.breakdown.userSubtitle}
             </p>
           </div>
-          <div className="statusPill">EDA feed</div>
+          <div className="statusPill">{uiText.overview.breakdown.feedStatus}</div>
         </div>
 
         <section className="newsGrid monitoringBoardGrid">
           <article className="monitorPanel">
-            <p className="summaryLabel">{isAdmin ? "Top users" : "My disks"}</p>
+            <p className="summaryLabel">
+              {isAdmin ? uiText.overview.breakdown.adminListTitle : uiText.overview.breakdown.userListTitle}
+            </p>
             <div className="monitorList">
               {boardItems.map((item, index) => (
                 <MonitorListRow
@@ -247,9 +248,9 @@ export function OverviewSection({
           </article>
 
           <article className="monitorPanel">
-            <p className="summaryLabel">Issued pool</p>
+            <p className="summaryLabel">{uiText.overview.breakdown.issuedPool}</p>
             <div className="monitorFeatureCard">
-              <p className="panelTitle">iSCSI production slice</p>
+              <p className="panelTitle">{uiText.overview.breakdown.productionSlice}</p>
               <p className="monitorHeroValue">{formatCompactBytesPerSecond(system?.throughput_bytes_per_sec ?? 0)}</p>
               <p className="summaryMeta">
                 {formatCompactNumber(system?.total_iops ?? 0)} IOPS{" • "}
@@ -324,8 +325,8 @@ function TimeSeriesCard({
       </div>
       <p className="summaryMeta">
         {history.length > 1
-          ? `Последние ${history.length} snapshot-точек из monitoring topic.`
-          : "Ожидание накопления тайм-серии."}
+          ? `Последние ${history.length} ${uiText.overview.charts.historySuffix}`
+          : uiText.overview.charts.waitingHistory}
       </p>
     </article>
   );

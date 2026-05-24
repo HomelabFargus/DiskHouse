@@ -1,5 +1,6 @@
 "use client";
 
+import { uiText } from "../constants";
 import type { AdminUser } from "../types";
 
 type AdminUsersSectionProps = {
@@ -28,12 +29,12 @@ export function AdminUsersSection({
       <section className="panel panelMain tablePanel panelFlat">
         <div className="panelHeader">
           <div>
-            <p className="summaryLabel">Администрирование</p>
-            <h2 className="panelTitle">Пользователи</h2>
+            <p className="summaryLabel">{uiText.adminUsers.eyebrow}</p>
+            <h2 className="panelTitle">{uiText.adminUsers.title}</h2>
           </div>
           <div className="tableActions">
             <button className="action" type="button" onClick={onCreateUser}>
-              Создать пользователя
+              {uiText.adminUsers.create}
             </button>
           </div>
         </div>
@@ -41,15 +42,15 @@ export function AdminUsersSection({
         <section className="inventoryToolbar">
           <div className="inventoryStats">
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Пользователи</span>
+              <span className="inventoryStatLabel">{uiText.adminUsers.stats.total}</span>
               <span className="inventoryStatValue">{adminUsers.length}</span>
             </article>
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Активные</span>
+              <span className="inventoryStatLabel">{uiText.adminUsers.stats.active}</span>
               <span className="inventoryStatValue">{enabledAdminUsers}</span>
             </article>
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Admins</span>
+              <span className="inventoryStatLabel">{uiText.adminUsers.stats.admins}</span>
               <span className="inventoryStatValue">{adminCount}</span>
             </article>
           </div>
@@ -57,18 +58,18 @@ export function AdminUsersSection({
 
         <section className="inventoryTableShell">
           <div className="tableHead tableHeadUsers">
-            <span>Пользователь</span>
-            <span>Email</span>
-            <span>Статус</span>
-            <span>Группы</span>
-            <span>Действия</span>
+            <span>{uiText.adminUsers.table.user}</span>
+            <span>{uiText.adminUsers.table.email}</span>
+            <span>{uiText.adminUsers.table.status}</span>
+            <span>{uiText.adminUsers.table.groups}</span>
+            <span>{uiText.adminUsers.table.actions}</span>
           </div>
 
           <div className="tableBody">
             {adminUsers.length === 0 ? (
               <div className="tableRow tableRowEmpty tableRowEmptyState">
                 <span className="placeholder">
-                  {isAdminUsersLoading ? "Загружаем пользователей..." : "Пользователи пока не найдены."}
+                  {isAdminUsersLoading ? uiText.adminUsers.emptyLoading : uiText.adminUsers.empty}
                 </span>
               </div>
             ) : (
@@ -81,7 +82,7 @@ export function AdminUsersSection({
                     </span>
                   </span>
                   <span className="tableMessage">
-                    <span className="tablePrimary">{user.email ?? "не указан"}</span>
+                    <span className="tablePrimary">{user.email ?? uiText.adminUsers.noEmail}</span>
                   </span>
                   <span className="tableStatusStack">
                     <span
@@ -89,18 +90,20 @@ export function AdminUsersSection({
                         user.enabled ? "statusBadgeReady" : "statusBadgeDeleting"
                       }`}
                     >
-                      {user.enabled ? "активен" : "отключён"}
+                      {user.enabled ? uiText.adminUsers.active : uiText.adminUsers.disabled}
                     </span>
-                    {user.is_admin ? <span className="statusBadge statusBadgePending">admin</span> : null}
+                    {user.is_admin ? (
+                      <span className="statusBadge statusBadgePending">{uiText.adminUsers.adminBadge}</span>
+                    ) : null}
                   </span>
-                  <span className="tableMessage">{user.groups.join(", ") || "нет"}</span>
+                  <span className="tableMessage">{user.groups.join(", ") || uiText.adminUsers.noGroups}</span>
                   <span className="tableActions">
                     <button
                       className="action actionSecondary actionInline"
                       type="button"
                       onClick={() => onEditUser(user)}
                     >
-                      Изменить
+                      {uiText.adminUsers.edit}
                     </button>
                     <button
                       className="action actionDanger actionInline"
@@ -108,7 +111,7 @@ export function AdminUsersSection({
                       onClick={() => onDeleteUser(user.id)}
                       disabled={isAdminSaving}
                     >
-                      Удалить
+                      {uiText.common.delete}
                     </button>
                   </span>
                 </article>

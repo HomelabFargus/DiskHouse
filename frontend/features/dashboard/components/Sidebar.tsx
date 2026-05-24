@@ -2,6 +2,7 @@
 
 import type { RefObject } from "react";
 
+import { uiText } from "../constants";
 import type { AdminSection, TabId, TabOption } from "../types";
 
 type SidebarProps = {
@@ -42,14 +43,14 @@ export function Sidebar({
           <span className="sidebarBackArrow" aria-hidden="true">
             &lt;
           </span>
-          <span>Назад</span>
+          <span>{uiText.sidebar.back}</span>
         </button>
       ) : (
         <div className="brand">
           <div className="brandMark">D</div>
           <div>
-            <p className="brandTitle">diskHub</p>
-            <p className="brandText">Storage control panel</p>
+            <p className="brandTitle">{uiText.common.brandName}</p>
+            <p className="brandText">{uiText.common.brandTagline}</p>
           </div>
         </div>
       )}
@@ -62,21 +63,21 @@ export function Sidebar({
               className={`navItem ${activeAdminSection === "disks" ? "navItemActive" : ""}`}
               onClick={() => onAdminSectionChange("disks")}
             >
-              Диски
+              {uiText.sidebar.adminSections.disks}
             </button>
             <button
               type="button"
               className={`navItem ${activeAdminSection === "users" ? "navItemActive" : ""}`}
               onClick={() => onAdminSectionChange("users")}
             >
-              Пользователи
+              {uiText.sidebar.adminSections.users}
             </button>
             <button
               type="button"
               className={`navItem ${activeAdminSection === "monitoring" ? "navItemActive" : ""}`}
               onClick={() => onAdminSectionChange("monitoring")}
             >
-              Мониторинг
+              {uiText.sidebar.adminSections.monitoring}
             </button>
           </>
         ) : (
@@ -96,7 +97,7 @@ export function Sidebar({
       <div className="sidebarFooter">
         <div className="sidebarMenuShell" ref={sidebarMenuRef}>
           {isSidebarMenuOpen ? (
-            <div className="sidebarMenu" role="menu" aria-label="Меню профиля">
+            <div className="sidebarMenu" role="menu" aria-label={uiText.sidebar.profileMenu}>
               {isAdmin ? (
                 <button
                   type="button"
@@ -104,11 +105,11 @@ export function Sidebar({
                   onClick={onOpenAdminPanel}
                   role="menuitem"
                 >
-                  Администрирование
+                  {uiText.sidebar.admin}
                 </button>
               ) : null}
               <button type="button" className="sidebarMenuItem" onClick={onLogout} role="menuitem">
-                Выйти
+                {uiText.sidebar.logout}
               </button>
             </div>
           ) : null}
@@ -118,7 +119,7 @@ export function Sidebar({
             className={`sidebarSettingsButton ${
               isSidebarMenuOpen ? "sidebarSettingsButtonActive" : ""
             }`}
-            aria-label="Открыть меню"
+            aria-label={uiText.common.closeMenu}
             aria-expanded={isSidebarMenuOpen}
             aria-haspopup="menu"
             onClick={onSidebarMenuToggle}

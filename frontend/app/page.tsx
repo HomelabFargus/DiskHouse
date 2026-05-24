@@ -3,7 +3,13 @@
 import type { FormEvent } from "react";
 import { startTransition, useEffect, useRef, useState } from "react";
 
-import { baseTabs, initialAdminForm, initialDiskForm, storageKey } from "../features/dashboard/constants";
+import {
+  baseTabs,
+  initialAdminForm,
+  initialDiskForm,
+  storageKey,
+  uiText
+} from "../features/dashboard/constants";
 import { AdminDisksSection } from "../features/dashboard/components/AdminDisksSection";
 import { AdminMonitoringSection } from "../features/dashboard/components/AdminMonitoringSection";
 import { AdminUsersSection } from "../features/dashboard/components/AdminUsersSection";
@@ -323,7 +329,7 @@ export default function HomePage() {
     }
 
     clearSessionState();
-    showToast("error", "Сессия истекла");
+    showToast("error", uiText.messages.sessionExpired);
     setIsAuthLoading(false);
   }
 
@@ -343,7 +349,7 @@ export default function HomePage() {
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось авторизоваться через Keycloak");
+        throw new Error(uiText.messages.loginFailed);
       }
 
       const tokens = (await response.json()) as TokenPayload;
@@ -351,7 +357,7 @@ export default function HomePage() {
       const valid = await hydrateProfile(nextSession.accessToken);
 
       if (!valid) {
-        throw new Error("Не удалось получить профиль пользователя");
+        throw new Error(uiText.messages.loginProfileFailed);
       }
 
       setSession(nextSession);
@@ -359,7 +365,7 @@ export default function HomePage() {
       setActiveTab("overview");
     } catch (requestError) {
       clearSessionState();
-      showToast("error", requestError instanceof Error ? requestError.message : "Ошибка входа");
+      showToast("error", requestError instanceof Error ? requestError.message : uiText.messages.loginError);
     } finally {
       setIsSubmittingAuth(false);
       setIsAuthLoading(false);
@@ -370,7 +376,7 @@ export default function HomePage() {
     event.preventDefault();
 
     if (!session?.accessToken) {
-      showToast("error", "Сначала войдите");
+      showToast("error", uiText.messages.loginRequired);
       return;
     }
 
@@ -384,7 +390,7 @@ export default function HomePage() {
     try {
       const sizeGb = Number(diskForm.sizeGb);
       if (!Number.isFinite(sizeGb) || sizeGb <= 0) {
-        throw new Error("Размер диска должен быть положительным числом");
+        throw new Error(uiText.messages.diskSizeInvalid);
       }
 
       const response = await fetch("/api/disks", {
@@ -404,23 +410,23 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось создать диск");
+        throw new Error(uiText.messages.diskCreateFailed);
       }
 
       const data = (await response.json()) as DiskCreateResponse;
       setDiskRequestId(data.request_id);
       setCreatedDiskId(data.disk_id);
-      showToast("success", "Диск создан");
+      showToast("success", uiText.messages.diskCreated);
       setIsCreateDiskModalOpen(false);
       await fetchDisks(session.accessToken);
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Ошибка создания диска"
+        requestError instanceof Error ? requestError.message : uiText.messages.diskCreateError
       );
     } finally {
       setIsCreatingDisk(false);
@@ -464,7 +470,7 @@ export default function HomePage() {
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить список дисков");
+        throw new Error(uiText.messages.disksListFailed);
       }
 
       const items = (await response.json()) as DiskSummary[];
@@ -472,7 +478,7 @@ export default function HomePage() {
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Не удалось загрузить диски"
+        requestError instanceof Error ? requestError.message : uiText.messages.disksLoadError
       );
     } finally {
       setIsDiskListLoading(false);
@@ -493,11 +499,11 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить monitoring snapshot.");
+        throw new Error(uiText.messages.monitoringLoadFailed);
       }
 
       const snapshot = (await response.json()) as MonitoringSnapshot;
@@ -539,15 +545,15 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для monitoring.");
+        throw new Error(uiText.messages.adminMonitoringForbidden);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить admin monitoring snapshot.");
+        throw new Error(uiText.messages.adminMonitoringLoadFailed);
       }
 
       const snapshot = (await response.json()) as MonitoringSnapshot;
@@ -577,7 +583,7 @@ export default function HomePage() {
 
   async function handleDeleteDisk(diskId: string) {
     if (!session?.accessToken) {
-      showToast("error", "Сначала войдите");
+      showToast("error", uiText.messages.loginRequired);
       return;
     }
 
@@ -597,23 +603,23 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Удалять можно только диски, запрошенные текущим пользователем.");
+        throw new Error(uiText.messages.diskDeleteForbidden);
       }
 
       if (response.status === 404) {
-        throw new Error("Диск не найден или уже удалён.");
+        throw new Error(uiText.messages.diskNotFound);
       }
 
       if (response.status === 409) {
-        throw new Error("Удаление этого диска уже завершено или недоступно.");
+        throw new Error(uiText.messages.diskDeleteConflict);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось удалить диск.");
+        throw new Error(uiText.messages.diskDeleteFailed);
       }
 
       const data = (await response.json()) as DiskCreateResponse;
@@ -625,12 +631,12 @@ export default function HomePage() {
       setDiskRequestId(data.request_id);
       setDiskUpdates([]);
       setIsDiskComplete(false);
-      showToast("success", "Диск удалён");
+      showToast("success", uiText.messages.diskDeleted);
       await fetchDisks(session.accessToken);
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Ошибка удаления диска"
+        requestError instanceof Error ? requestError.message : uiText.messages.diskDeleteError
       );
     } finally {
       setDeletingDiskId(null);
@@ -651,15 +657,15 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для доступа к админ-панели.");
+        throw new Error(uiText.messages.adminUsersForbidden);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить пользователей.");
+        throw new Error(uiText.messages.adminUsersLoadFailed);
       }
 
       const users = (await response.json()) as AdminUser[];
@@ -667,7 +673,7 @@ export default function HomePage() {
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Не удалось загрузить пользователей"
+        requestError instanceof Error ? requestError.message : uiText.messages.adminUsersLoadError
       );
     } finally {
       setIsAdminUsersLoading(false);
@@ -688,15 +694,15 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для доступа к дискам.");
+        throw new Error(uiText.messages.adminDisksForbidden);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить все диски.");
+        throw new Error(uiText.messages.adminDisksLoadFailed);
       }
 
       const items = (await response.json()) as DiskSummary[];
@@ -713,7 +719,7 @@ export default function HomePage() {
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Не удалось загрузить все диски"
+        requestError instanceof Error ? requestError.message : uiText.messages.adminDisksLoadError
       );
     } finally {
       setIsAdminDisksLoading(false);
@@ -722,7 +728,7 @@ export default function HomePage() {
 
   async function handleAdminDeleteDisk(disk: DiskSummary) {
     if (!session?.accessToken) {
-      showToast("error", "Сначала войдите");
+      showToast("error", uiText.messages.loginRequired);
       return;
     }
 
@@ -745,24 +751,24 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для удаления диска.");
+        throw new Error(uiText.messages.adminDiskDeleteForbidden);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось удалить диск.");
+        throw new Error(uiText.messages.diskDeleteFailed);
       }
 
-      showToast("success", "Диск удалён");
+      showToast("success", uiText.messages.diskDeleted);
       await fetchAdminDisks(session.accessToken);
       await fetchDisks(session.accessToken);
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Ошибка удаления диска"
+        requestError instanceof Error ? requestError.message : uiText.messages.diskDeleteError
       );
     } finally {
       setAdminDiskActionId(null);
@@ -771,24 +777,24 @@ export default function HomePage() {
 
   async function handleAdminTransferDisk(disk: DiskSummary) {
     if (!session?.accessToken) {
-      showToast("error", "Сначала войдите");
+      showToast("error", uiText.messages.loginRequired);
       return;
     }
 
     const nextOwnerSub = adminDiskOwnerDrafts[disk.disk_id]?.trim();
     if (!nextOwnerSub) {
-      showToast("error", "Выберите владельца");
+      showToast("error", uiText.messages.ownerRequired);
       return;
     }
 
     if (nextOwnerSub === disk.owner_sub) {
-      showToast("error", "Владелец не изменился");
+      showToast("error", uiText.messages.ownerUnchanged);
       return;
     }
 
     const nextOwner = adminUsers.find((user) => user.id === nextOwnerSub);
     if (!nextOwner) {
-      showToast("error", "Пользователь не найден");
+      showToast("error", uiText.messages.userNotFound);
       return;
     }
 
@@ -818,24 +824,24 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для изменения владельца.");
+        throw new Error(uiText.messages.ownerChangeForbidden);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось изменить владельца.");
+        throw new Error(uiText.messages.ownerChangeFailed);
       }
 
-      showToast("success", "Владелец изменён");
+      showToast("success", uiText.messages.ownerChanged);
       await fetchAdminDisks(session.accessToken);
       await fetchDisks(session.accessToken);
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Ошибка смены владельца"
+        requestError instanceof Error ? requestError.message : uiText.messages.ownerChangeError
       );
     } finally {
       setAdminDiskActionId(null);
@@ -846,7 +852,7 @@ export default function HomePage() {
     event.preventDefault();
 
     if (!session?.accessToken) {
-      showToast("error", "Сначала войдите");
+      showToast("error", uiText.messages.loginRequired);
       return;
     }
 
@@ -865,11 +871,11 @@ export default function HomePage() {
       };
 
       if (!payload.username) {
-        throw new Error("Username обязателен.");
+        throw new Error(uiText.messages.usernameRequired);
       }
 
       if (!editingAdminUserId && !payload.password.trim()) {
-        throw new Error("Для нового пользователя нужен пароль.");
+        throw new Error(uiText.messages.newUserPasswordRequired);
       }
 
       const response = await fetch(
@@ -887,27 +893,32 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для изменения пользователей.");
+        throw new Error(uiText.messages.adminUsersChangeForbidden);
       }
 
       if (!response.ok) {
         throw new Error(
-          editingAdminUserId ? "Не удалось обновить пользователя." : "Не удалось создать пользователя."
+          editingAdminUserId
+            ? uiText.messages.adminUserUpdateFailed
+            : uiText.messages.adminUserCreateFailed
         );
       }
 
       resetAdminForm();
-      showToast("success", editingAdminUserId ? "Пользователь обновлён" : "Пользователь создан");
+      showToast(
+        "success",
+        editingAdminUserId ? uiText.messages.adminUserUpdated : uiText.messages.adminUserCreated
+      );
       setIsAdminModalOpen(false);
       await fetchAdminUsers(session.accessToken);
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Не удалось сохранить пользователя"
+        requestError instanceof Error ? requestError.message : uiText.messages.adminUserSaveError
       );
     } finally {
       setIsAdminSaving(false);
@@ -916,7 +927,7 @@ export default function HomePage() {
 
   async function handleDeleteAdminUser(userId: string) {
     if (!session?.accessToken) {
-      showToast("error", "Сначала войдите");
+      showToast("error", uiText.messages.loginRequired);
       return;
     }
 
@@ -934,27 +945,27 @@ export default function HomePage() {
 
       if (response.status === 401) {
         clearSessionState();
-        throw new Error("Сессия больше не действительна. Войдите снова.");
+        throw new Error(uiText.messages.sessionInvalid);
       }
 
       if (response.status === 403) {
-        throw new Error("Недостаточно прав для удаления пользователя.");
+        throw new Error(uiText.messages.adminUserDeleteForbidden);
       }
 
       if (!response.ok) {
-        throw new Error("Не удалось удалить пользователя.");
+        throw new Error(uiText.messages.adminUserDeleteFailed);
       }
 
       if (editingAdminUserId === userId) {
         resetAdminForm();
       }
 
-      showToast("success", "Пользователь удалён");
+      showToast("success", uiText.messages.adminUserDeleted);
       await fetchAdminUsers(session.accessToken);
     } catch (requestError) {
       showToast(
         "error",
-        requestError instanceof Error ? requestError.message : "Не удалось удалить пользователя"
+        requestError instanceof Error ? requestError.message : uiText.messages.adminUserDeleteError
       );
     } finally {
       setIsAdminSaving(false);
@@ -1065,7 +1076,8 @@ export default function HomePage() {
   }
 
   const selectedDisk = disks.find((disk) => disk.disk_id === selectedDiskId) ?? null;
-  const displayName = profile?.name ?? profile?.preferred_username ?? profile?.email ?? "unknown";
+  const displayName =
+    profile?.name ?? profile?.preferred_username ?? profile?.email ?? uiText.messages.unknownUser;
   const issuedDisks = monitoringSnapshot?.logical_disks ?? [];
   const activeDisks = issuedDisks.length;
   const pendingDisks = disks.filter(
@@ -1076,7 +1088,7 @@ export default function HomePage() {
   const adminTotalDiskSize = adminDisks.reduce((total, disk) => total + disk.size_gb, 0);
   const enabledAdminUsers = adminUsers.filter((user) => user.enabled).length;
   const adminCount = adminUsers.filter((user) => user.is_admin).length;
-  const userMeta = profile?.email ?? profile?.preferred_username ?? "Профиль загружен";
+  const userMeta = profile?.email ?? profile?.preferred_username ?? uiText.messages.profileLoaded;
 
   if (isAuthLoading) {
     return <LoadingScreen />;
@@ -1127,11 +1139,11 @@ export default function HomePage() {
               <div className="topbarActions">
                 <div className="badge">
                   <span className="badgeDot" />
-                  Доступ открыт
+                  {uiText.topbar.accessOpen}
                 </div>
                 {activeTab === "overview" ? (
                   <button className="action" onClick={() => setActiveTab("disks")}>
-                    К дискам
+                    {uiText.topbar.goToDisks}
                   </button>
                 ) : null}
               </div>

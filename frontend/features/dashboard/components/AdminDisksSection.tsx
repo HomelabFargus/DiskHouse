@@ -1,5 +1,6 @@
 "use client";
 
+import { uiText } from "../constants";
 import { formatTimestamp, getDiskStatusClassName } from "../utils";
 import type { AdminUser, DiskSummary } from "../types";
 
@@ -33,23 +34,23 @@ export function AdminDisksSection({
       <section className="panel panelMain tablePanel panelFlat">
         <div className="panelHeader">
           <div>
-            <p className="summaryLabel">Администрирование</p>
-            <h2 className="panelTitle">Все диски</h2>
+            <p className="summaryLabel">{uiText.adminDisks.eyebrow}</p>
+            <h2 className="panelTitle">{uiText.adminDisks.title}</h2>
           </div>
         </div>
 
         <section className="inventoryToolbar">
           <div className="inventoryStats">
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Все диски</span>
+              <span className="inventoryStatLabel">{uiText.adminDisks.stats.total}</span>
               <span className="inventoryStatValue">{adminDisks.length}</span>
             </article>
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Общий объём</span>
+              <span className="inventoryStatLabel">{uiText.adminDisks.stats.capacity}</span>
               <span className="inventoryStatValue">{adminTotalDiskSize} GB</span>
             </article>
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Владельцы</span>
+              <span className="inventoryStatLabel">{uiText.adminDisks.stats.owners}</span>
               <span className="inventoryStatValue">
                 {new Set(adminDisks.map((disk) => disk.owner_sub)).size}
               </span>
@@ -71,7 +72,7 @@ export function AdminDisksSection({
             {adminDisks.length === 0 ? (
               <div className="tableRow tableRowEmpty tableRowEmptyState">
                 <span className="placeholder">
-                  {isAdminDisksLoading ? "Загружаем диски..." : "Диски пока не найдены."}
+                  {isAdminDisksLoading ? uiText.adminDisks.emptyLoading : uiText.adminDisks.empty}
                 </span>
               </div>
             ) : (
@@ -124,7 +125,7 @@ export function AdminDisksSection({
                         onClick={() => onTransferDisk(disk)}
                         disabled={isBusy || isAdminUsersLoading || adminUsers.length === 0}
                       >
-                        {isBusy ? "Сохранение..." : "Сменить владельца"}
+                        {isBusy ? uiText.common.saving : uiText.adminDisks.transferOwner}
                       </button>
                       <button
                         className="action actionDanger actionInline"
@@ -132,7 +133,9 @@ export function AdminDisksSection({
                         onClick={() => onDeleteDisk(disk)}
                         disabled={isBusy || disk.status === "deleting"}
                       >
-                        {isBusy || disk.status === "deleting" ? "Удаление..." : "Удалить"}
+                        {isBusy || disk.status === "deleting"
+                          ? uiText.common.deleting
+                          : uiText.common.delete}
                       </button>
                     </div>
                   </article>

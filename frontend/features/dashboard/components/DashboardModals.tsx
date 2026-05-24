@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import { createPortal } from "react-dom";
 
+import { uiText } from "../constants";
 import type { AdminFormState, DiskFormState, DiskSummary } from "../types";
 
 type CreateDiskModalProps = {
@@ -44,9 +45,9 @@ export function CreateDiskModal({
       >
         <div className="modalTopbar">
           <div className="modalTopbarCopy">
-            <span className="modalEyebrow">Volume wizard</span>
+            <span className="modalEyebrow">{uiText.modals.createDisk.eyebrow}</span>
             <h2 className="modalTitle" id="create-disk-modal-title">
-              Создание диска
+              {uiText.modals.createDisk.title}
             </h2>
           </div>
           <button
@@ -54,7 +55,7 @@ export function CreateDiskModal({
             className="modalIconButton"
             onClick={onClose}
             disabled={isCreatingDisk}
-            aria-label="Закрыть окно создания диска"
+            aria-label={uiText.modals.createDisk.closeLabel}
           >
             ×
           </button>
@@ -62,16 +63,15 @@ export function CreateDiskModal({
 
         <section className="modalIntro">
           <div>
-            <p className="summaryLabel">Новый том</p>
-            <p className="panelSubtitle">
-              Настройте параметры тома и отправьте его в pipeline. После создания он появится в
-              inventory и справа откроется инструкция по подключению.
-            </p>
+            <p className="summaryLabel">{uiText.modals.createDisk.introLabel}</p>
+            <p className="panelSubtitle">{uiText.modals.createDisk.introText}</p>
           </div>
           <div className="modalChips">
-            <span className="chip">MongoDB inventory</span>
-            <span className="chip">Personal pipeline</span>
-            <span className="chip">iSCSI export</span>
+            {uiText.modals.createDisk.chips.map((chip) => (
+              <span className="chip" key={chip}>
+                {chip}
+              </span>
+            ))}
           </div>
         </section>
 
@@ -79,17 +79,15 @@ export function CreateDiskModal({
           <section className="authPanel diskForm modalFormPanel">
             <div className="modalSectionHead">
               <div>
-                <p className="summaryLabel">Параметры</p>
-                <p className="panelSubtitle">
-                  Базовые настройки тома для публикации в storage pipeline.
-                </p>
+                <p className="summaryLabel">{uiText.modals.createDisk.paramsLabel}</p>
+                <p className="panelSubtitle">{uiText.modals.createDisk.paramsText}</p>
               </div>
-              <div className="statusPill">Template volume</div>
+              <div className="statusPill">{uiText.modals.createDisk.templateVolume}</div>
             </div>
 
             <div className="modalFieldGrid">
               <label className="field modalFieldWide">
-                <span className="fieldLabel">Название диска</span>
+                <span className="fieldLabel">{uiText.modals.createDisk.name}</span>
                 <input
                   className="fieldInput"
                   value={diskForm.name}
@@ -99,7 +97,7 @@ export function CreateDiskModal({
               </label>
 
               <label className="field">
-                <span className="fieldLabel">Размер, ГБ</span>
+                <span className="fieldLabel">{uiText.modals.createDisk.size}</span>
                 <input
                   className="fieldInput"
                   inputMode="numeric"
@@ -110,7 +108,7 @@ export function CreateDiskModal({
               </label>
 
               <label className="field">
-                <span className="fieldLabel">Файловая система</span>
+                <span className="fieldLabel">{uiText.modals.createDisk.filesystem}</span>
                 <select
                   className="fieldInput"
                   value={diskForm.filesystem}
@@ -123,7 +121,7 @@ export function CreateDiskModal({
               </label>
 
               <label className="field modalFieldWide">
-                <span className="fieldLabel">Класс производительности</span>
+                <span className="fieldLabel">{uiText.modals.createDisk.performanceTier}</span>
                 <select
                   className="fieldInput"
                   value={diskForm.performanceTier}
@@ -144,10 +142,10 @@ export function CreateDiskModal({
               onClick={onClose}
               disabled={isCreatingDisk}
             >
-              Отмена
+              {uiText.common.cancel}
             </button>
             <button className="action modalSubmit" type="submit" disabled={isCreatingDisk}>
-              {isCreatingDisk ? "Создание..." : "Создать диск"}
+              {isCreatingDisk ? uiText.modals.createDisk.submitting : uiText.modals.createDisk.submit}
             </button>
           </div>
         </form>
@@ -179,16 +177,16 @@ export function IscsiAccessModal({ isOpen, selectedDisk, onClose }: IscsiAccessM
       >
         <div className="modalTopbar">
           <div className="modalTopbarCopy">
-            <span className="modalEyebrow">Connection guide</span>
+            <span className="modalEyebrow">{uiText.modals.iscsi.eyebrow}</span>
             <h2 className="modalTitle" id="iscsi-access-modal-title">
-              iSCSI access
+              {uiText.modals.iscsi.title}
             </h2>
           </div>
           <button
             type="button"
             className="modalIconButton"
             onClick={onClose}
-            aria-label="Закрыть окно iSCSI access"
+            aria-label={uiText.modals.iscsi.closeLabel}
           >
             ×
           </button>
@@ -196,10 +194,8 @@ export function IscsiAccessModal({ isOpen, selectedDisk, onClose }: IscsiAccessM
 
         <section className="modalIntro">
           <div>
-            <p className="summaryLabel">Подключение</p>
-            <p className="panelSubtitle">
-              Инструкция по target, discovery и mount для выбранного диска.
-            </p>
+            <p className="summaryLabel">{uiText.modals.iscsi.introLabel}</p>
+            <p className="panelSubtitle">{uiText.modals.iscsi.introText}</p>
           </div>
           {selectedDisk ? (
             <div className="modalChips">
@@ -220,7 +216,7 @@ export function IscsiAccessModal({ isOpen, selectedDisk, onClose }: IscsiAccessM
                     <p className="rowMeta">{selectedDisk.disk_id}</p>
                   </div>
                   <div className={`statusPill ${selectedDisk.iscsi ? "statusDone" : ""}`}>
-                    {selectedDisk.iscsi ? "Ready" : "Нет target"}
+                    {selectedDisk.iscsi ? uiText.modals.iscsi.ready : uiText.modals.iscsi.noTarget}
                   </div>
                 </div>
 
@@ -228,61 +224,60 @@ export function IscsiAccessModal({ isOpen, selectedDisk, onClose }: IscsiAccessM
                   <>
                     <div className="connectionGrid">
                       <div className="connectionFact">
-                        <span className="fieldLabel">Portal</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.portal}</span>
                         <code className="inlineCode">
                           {selectedDisk.iscsi.portal_address}:{selectedDisk.iscsi.portal_port}
                         </code>
                       </div>
                       <div className="connectionFact">
-                        <span className="fieldLabel">IQN</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.iqn}</span>
                         <code className="inlineCode">{selectedDisk.iscsi.target_iqn}</code>
                       </div>
                       <div className="connectionFact">
-                        <span className="fieldLabel">LUN</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.lun}</span>
                         <code className="inlineCode">{selectedDisk.iscsi.lun}</code>
                       </div>
                       <div className="connectionFact">
-                        <span className="fieldLabel">Auth</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.auth}</span>
                         <code className="inlineCode">{selectedDisk.iscsi.auth_type}</code>
                       </div>
                     </div>
 
                     <div className="commandStack">
                       <div className="commandBlock">
-                        <span className="fieldLabel">1. Discovery</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.steps.discovery}</span>
                         <code className="commandCode">{selectedDisk.iscsi.discovery_command}</code>
                       </div>
                       <div className="commandBlock">
-                        <span className="fieldLabel">2. Login</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.steps.login}</span>
                         <code className="commandCode">{selectedDisk.iscsi.login_command}</code>
                       </div>
                       <div className="commandBlock">
-                        <span className="fieldLabel">3. Device</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.steps.device}</span>
                         <code className="commandCode">{selectedDisk.iscsi.device_path}</code>
                       </div>
                       <div className="commandBlock">
-                        <span className="fieldLabel">4. Mount</span>
+                        <span className="fieldLabel">{uiText.modals.iscsi.steps.mount}</span>
                         <code className="commandCode">{selectedDisk.iscsi.mount_hint}</code>
                       </div>
                     </div>
                   </>
                 ) : (
                   <p className="panelSubtitle">
-                    Для этого диска target ещё не готов. Дождитесь статуса <strong>ready / ready</strong>{" "}
-                    после завершения pipeline.
+                    {uiText.modals.iscsi.pendingTarget}
+                    <strong>{uiText.modals.iscsi.readyPair}</strong>
+                    {uiText.modals.iscsi.pendingTargetSuffix}
                   </p>
                 )}
               </div>
             ) : (
-              <p className="panelSubtitle">
-                Выберите диск в inventory, затем откройте окно iSCSI access.
-              </p>
+              <p className="panelSubtitle">{uiText.modals.iscsi.empty}</p>
             )}
           </section>
 
           <div className="modalFooter">
             <button type="button" className="action actionSecondary" onClick={onClose}>
-              Закрыть
+              {uiText.common.close}
             </button>
           </div>
         </section>
@@ -335,9 +330,11 @@ export function AdminUserModal({
       >
         <div className="modalTopbar">
           <div className="modalTopbarCopy">
-            <span className="modalEyebrow">{editingAdminUserId ? "Edit user" : "New user"}</span>
+            <span className="modalEyebrow">
+              {editingAdminUserId ? uiText.modals.adminUser.editEyebrow : uiText.modals.adminUser.newEyebrow}
+            </span>
             <h2 className="modalTitle" id="admin-user-modal-title">
-              {editingAdminUserId ? "Редактирование пользователя" : "Создание пользователя"}
+              {editingAdminUserId ? uiText.modals.adminUser.editTitle : uiText.modals.adminUser.createTitle}
             </h2>
           </div>
           <button
@@ -345,7 +342,7 @@ export function AdminUserModal({
             className="modalIconButton"
             onClick={onClose}
             disabled={isAdminSaving}
-            aria-label="Закрыть окно пользователя"
+            aria-label={uiText.modals.adminUser.closeLabel}
           >
             ×
           </button>
@@ -354,20 +351,22 @@ export function AdminUserModal({
         <section className="modalIntro">
           <div>
             <p className="summaryLabel">
-              {editingAdminUserId ? "Режим редактирования" : "Новый пользователь"}
+              {editingAdminUserId ? uiText.modals.adminUser.editMode : uiText.modals.adminUser.newMode}
             </p>
             <p className="panelSubtitle">
               {editingAdminUserId
-                ? "Обновите профиль, доступ или пароль. Пустой пароль оставит текущий без изменений."
-                : "Заполните базовые данные и сразу задайте уровень доступа для новой учётной записи."}
+                ? uiText.modals.adminUser.editText
+                : uiText.modals.adminUser.createText}
             </p>
           </div>
           <div className="modalChips">
             <span className="chip">
-              {editingAdminUserId ? "Изменение профиля" : "Создание профиля"}
+              {editingAdminUserId ? uiText.modals.adminUser.editChip : uiText.modals.adminUser.createChip}
             </span>
             <span className="chip">{adminForm.isAdmin ? "Admin" : "User"}</span>
-            <span className="chip">{adminForm.enabled ? "Активен" : "Отключён"}</span>
+            <span className="chip">
+              {adminForm.enabled ? uiText.modals.adminUser.active : uiText.modals.adminUser.disabled}
+            </span>
           </div>
         </section>
 
@@ -375,51 +374,51 @@ export function AdminUserModal({
           <section className="authPanel adminForm modalFormPanel">
             <section className="adminFormSection">
               <div className="adminFormSectionHead">
-                <h3 className="adminSectionTitle">Профиль</h3>
+                <h3 className="adminSectionTitle">{uiText.modals.adminUser.profileSection}</h3>
               </div>
 
               <div className="adminFormGrid">
                 <label className="field">
-                  <span className="fieldLabel">Логин</span>
+                  <span className="fieldLabel">{uiText.modals.adminUser.username}</span>
                   <input
                     className="fieldInput"
                     value={adminForm.username}
                     onChange={(event) => onFieldChange("username", event.target.value)}
-                    placeholder="Например, a.smirnov"
+                    placeholder={uiText.modals.adminUser.usernamePlaceholder}
                     required
                   />
-                  <span className="fieldHint">Обязательно</span>
+                  <span className="fieldHint">{uiText.modals.adminUser.required}</span>
                 </label>
 
                 <label className="field">
-                  <span className="fieldLabel">Email</span>
+                  <span className="fieldLabel">{uiText.modals.adminUser.email}</span>
                   <input
                     className="fieldInput"
                     type="email"
                     value={adminForm.email}
                     onChange={(event) => onFieldChange("email", event.target.value)}
-                    placeholder="user@diskhub.local"
+                    placeholder={uiText.modals.adminUser.emailPlaceholder}
                   />
-                  <span className="fieldHint">Обязательно</span>
+                  <span className="fieldHint">{uiText.modals.adminUser.required}</span>
                 </label>
 
                 <label className="field">
-                  <span className="fieldLabel">Имя</span>
+                  <span className="fieldLabel">{uiText.modals.adminUser.firstName}</span>
                   <input
                     className="fieldInput"
                     value={adminForm.firstName}
                     onChange={(event) => onFieldChange("firstName", event.target.value)}
-                    placeholder="Алексей"
+                    placeholder={uiText.modals.adminUser.firstNamePlaceholder}
                   />
                 </label>
 
                 <label className="field">
-                  <span className="fieldLabel">Фамилия</span>
+                  <span className="fieldLabel">{uiText.modals.adminUser.lastName}</span>
                   <input
                     className="fieldInput"
                     value={adminForm.lastName}
                     onChange={(event) => onFieldChange("lastName", event.target.value)}
-                    placeholder="Смирнов"
+                    placeholder={uiText.modals.adminUser.lastNamePlaceholder}
                   />
                 </label>
               </div>
@@ -427,7 +426,7 @@ export function AdminUserModal({
 
             <section className="adminFormSection">
               <div className="adminFormSectionHead">
-                <h3 className="adminSectionTitle">Доступ</h3>
+                <h3 className="adminSectionTitle">{uiText.modals.adminUser.accessSection}</h3>
               </div>
 
               <div className="adminToggleGrid">
@@ -438,8 +437,8 @@ export function AdminUserModal({
                     onChange={(event) => onFieldChange("enabled", event.target.checked)}
                   />
                   <span className="toggleCopy">
-                    <span className="toggleTitle">Активировать пользователя</span>
-                    <span className="toggleHint">Разрешает авторизацию и работу с системой.</span>
+                    <span className="toggleTitle">{uiText.modals.adminUser.enableUser}</span>
+                    <span className="toggleHint">{uiText.modals.adminUser.enableUserHint}</span>
                   </span>
                 </label>
 
@@ -450,17 +449,15 @@ export function AdminUserModal({
                     onChange={(event) => onFieldChange("isAdmin", event.target.checked)}
                   />
                   <span className="toggleCopy">
-                    <span className="toggleTitle">Администратор</span>
-                    <span className="toggleHint">
-                      Даёт доступ к управлению пользователями и расширенным разделам.
-                    </span>
+                    <span className="toggleTitle">{uiText.modals.adminUser.adminRole}</span>
+                    <span className="toggleHint">{uiText.modals.adminUser.adminRoleHint}</span>
                   </span>
                 </label>
               </div>
 
               <label className="field">
                 <span className="fieldLabel">
-                  {editingAdminUserId ? "Новый пароль" : "Пароль"}
+                  {editingAdminUserId ? uiText.modals.adminUser.newPassword : uiText.modals.adminUser.password}
                 </span>
                 <input
                   className="fieldInput"
@@ -469,32 +466,38 @@ export function AdminUserModal({
                   onChange={(event) => onFieldChange("password", event.target.value)}
                   placeholder={
                     editingAdminUserId
-                      ? "Оставьте пустым, чтобы не менять"
-                      : "Минимум для первого входа"
+                      ? uiText.modals.adminUser.editPasswordPlaceholder
+                      : uiText.modals.adminUser.createPasswordPlaceholder
                   }
                 />
                 <span className="fieldHint">
                   {editingAdminUserId
-                    ? "Заполняйте только если нужно сбросить пароль."
-                    : "Обязателен только для новой учётной записи."}
+                    ? uiText.modals.adminUser.editPasswordHint
+                    : uiText.modals.adminUser.createPasswordHint}
                 </span>
               </label>
             </section>
 
             <section className="adminPreviewCard">
               <div>
-                <p className="summaryLabel">Предпросмотр</p>
+                <p className="summaryLabel">{uiText.modals.adminUser.preview}</p>
                 <p className="adminPreviewName">
                   {[adminForm.firstName, adminForm.lastName].filter(Boolean).join(" ") ||
                     adminForm.username ||
-                    "Новый пользователь"}
+                    uiText.modals.adminUser.newUserFallback}
                 </p>
-                <p className="adminPreviewMeta">{adminForm.email || "Email пока не указан"}</p>
+                <p className="adminPreviewMeta">
+                  {adminForm.email || uiText.modals.adminUser.emailMissing}
+                </p>
               </div>
               <div className="chipRow">
-                <span className="chip">{adminForm.enabled ? "Активен" : "Отключён"}</span>
+                <span className="chip">
+                  {adminForm.enabled ? uiText.modals.adminUser.active : uiText.modals.adminUser.disabled}
+                </span>
                 <span className="chip">{adminForm.isAdmin ? "Admin" : "User"}</span>
-                <span className="chip">{editingAdminUserId ? "Редактирование" : "Создание"}</span>
+                <span className="chip">
+                  {editingAdminUserId ? uiText.modals.adminUser.editState : uiText.modals.adminUser.createState}
+                </span>
               </div>
             </section>
           </section>
@@ -507,7 +510,7 @@ export function AdminUserModal({
                 onClick={onReset}
                 disabled={isAdminSaving}
               >
-                Сбросить
+                {uiText.modals.adminUser.reset}
               </button>
             ) : null}
             <button
@@ -516,14 +519,14 @@ export function AdminUserModal({
               onClick={onClose}
               disabled={isAdminSaving}
             >
-              Отмена
+              {uiText.common.cancel}
             </button>
             <button className="action modalSubmit" type="submit" disabled={isAdminSaving}>
               {isAdminSaving
-                ? "Сохранение..."
+                ? uiText.common.saving
                 : editingAdminUserId
-                  ? "Сохранить изменения"
-                  : "Создать пользователя"}
+                  ? uiText.modals.adminUser.save
+                  : uiText.modals.adminUser.create}
             </button>
           </div>
         </form>
@@ -568,9 +571,9 @@ export function DeleteDiskModal({
       >
         <div className="modalTopbar">
           <div className="modalTopbarCopy">
-            <span className="modalEyebrow">Подтверждение</span>
+            <span className="modalEyebrow">{uiText.modals.deleteDisk.eyebrow}</span>
             <h2 className="modalTitle" id="delete-disk-modal-title">
-              Удаление диска
+              {uiText.modals.deleteDisk.title}
             </h2>
           </div>
           <button
@@ -578,7 +581,7 @@ export function DeleteDiskModal({
             className="modalIconButton"
             onClick={onCancel}
             disabled={Boolean(deletingDiskId)}
-            aria-label="Закрыть окно подтверждения удаления"
+            aria-label={uiText.modals.deleteDisk.closeLabel}
           >
             ×
           </button>
@@ -586,9 +589,11 @@ export function DeleteDiskModal({
 
         <section className="modalIntro modalIntroConfirm">
           <div>
-            <p className="summaryLabel">Вы уверены?</p>
+            <p className="summaryLabel">{uiText.modals.deleteDisk.question}</p>
             <p className="panelSubtitle">
-              Диск <strong>{diskId}</strong> будет отправлен на удаление.
+              {uiText.modals.deleteDisk.textBeforeId}
+              <strong>{diskId}</strong>
+              {uiText.modals.deleteDisk.textAfterId}
             </p>
           </div>
         </section>
@@ -600,7 +605,7 @@ export function DeleteDiskModal({
             onClick={onCancel}
             disabled={Boolean(deletingDiskId)}
           >
-            Отмена
+            {uiText.common.cancel}
           </button>
           <button
             type="button"
@@ -611,7 +616,7 @@ export function DeleteDiskModal({
             }}
             disabled={Boolean(deletingDiskId)}
           >
-            {deletingDiskId === diskId ? "Удаление..." : "Удалить"}
+            {deletingDiskId === diskId ? uiText.common.deleting : uiText.common.delete}
           </button>
         </div>
       </section>

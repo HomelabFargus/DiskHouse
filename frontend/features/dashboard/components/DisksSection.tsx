@@ -1,5 +1,6 @@
 "use client";
 
+import { uiText } from "../constants";
 import { formatTimestamp, getDiskStatusClassName } from "../utils";
 import type { DiskSummary } from "../types";
 
@@ -35,19 +36,19 @@ export function DisksSection({
       <section className="panel panelMain tablePanel panelFlat">
         <div className="panelHeader">
           <div>
-            <h2 className="panelTitle">Ваши диски</h2>
-            <p className="panelSubtitle">Панель управления блочными устройствами</p>
+            <h2 className="panelTitle">{uiText.disks.title}</h2>
+            <p className="panelSubtitle">{uiText.disks.subtitle}</p>
           </div>
           <div className="tableActions">
             <button type="button" className="action" onClick={onCreateDisk}>
-              Создать диск
+              {uiText.disks.create}
             </button>
             <div className={`statusPill ${isDiskComplete ? "statusDone" : ""}`}>
               {diskRequestId
                 ? isDiskComplete
-                  ? "Операция завершена"
-                  : "Операция выполняется"
-                : "Ожидание действий"}
+                  ? uiText.disks.statusComplete
+                  : uiText.disks.statusInProgress
+                : uiText.disks.statusIdle}
             </div>
           </div>
         </div>
@@ -55,38 +56,36 @@ export function DisksSection({
         <section className="inventoryToolbar">
           <div className="inventoryStats">
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Всего</span>
+              <span className="inventoryStatLabel">{uiText.disks.stats.total}</span>
               <span className="inventoryStatValue">{disks.length}</span>
             </article>
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">В работе</span>
+              <span className="inventoryStatLabel">{uiText.disks.stats.pending}</span>
               <span className="inventoryStatValue">{pendingDisks}</span>
             </article>
             <article className="inventoryStat">
-              <span className="inventoryStatLabel">Общий объём</span>
+              <span className="inventoryStatLabel">{uiText.disks.stats.capacity}</span>
               <span className="inventoryStatValue">{totalDiskSize} GB</span>
             </article>
           </div>
-          <p className="inventoryHint">
-            Нажмите на диск, чтобы посмотреть информацию по подключению.
-          </p>
+          <p className="inventoryHint">{uiText.disks.hint}</p>
         </section>
 
         <section className="inventoryTableShell">
           <div className="tableHead tableHeadDisks">
-            <span>Имя</span>
-            <span>Размер</span>
-            <span>Владелец</span>
-            <span>Статус</span>
-            <span>Обновлено</span>
-            <span>Действия</span>
+            <span>{uiText.disks.table.name}</span>
+            <span>{uiText.disks.table.size}</span>
+            <span>{uiText.disks.table.owner}</span>
+            <span>{uiText.disks.table.status}</span>
+            <span>{uiText.disks.table.updated}</span>
+            <span>{uiText.disks.table.actions}</span>
           </div>
 
           <div className="tableBody">
             {disks.length === 0 ? (
               <div className="tableRow tableRowEmpty tableRowEmptyState">
                 <span className="placeholder">
-                  {isDiskListLoading ? "Загружаем список дисков..." : "Пока нет созданных дисков"}
+                  {isDiskListLoading ? uiText.disks.emptyLoading : uiText.disks.empty}
                 </span>
               </div>
             ) : (
@@ -129,8 +128,8 @@ export function DisksSection({
                       disabled={deletingDiskId === disk.disk_id || disk.status === "deleting"}
                     >
                       {deletingDiskId === disk.disk_id || disk.status === "deleting"
-                        ? "Удаление..."
-                        : "Удалить"}
+                        ? uiText.common.deleting
+                        : uiText.common.delete}
                     </button>
                   </span>
                 </article>
